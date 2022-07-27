@@ -44,7 +44,9 @@ class StaticURLTests(TestCase):
     #     self.assertEqual(response.status_code, 200)
 
     def test_url_uses_correct_group(self):
-        response = self.guest_client.get(f'/group/{StaticURLTests.group.slug}/')
+        response = self.guest_client.get(
+            f'/group/{StaticURLTests.group.slug}/'
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_url_uses_correct_profile(self):
@@ -56,19 +58,23 @@ class StaticURLTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_create_url_authorized(self):
-        """Проверка доступа для авторизованного пользователя к созданию поста"""
+        """Проверка доступа для авторизованного пользователя
+           к созданию поста"""
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, 200)
 
     def test_create_url_unauthorized(self):
-        """Проверка доступа для неавторизованного пользователя к созданию поста"""
+        """Проверка доступа для неавторизованного пользователя
+           к созданию поста"""
         response = self.guest_client.get('/create/')
         self.assertEqual(response.status_code, 302)
 
     def test_edit_url_unauthorized(self):
         """Проверка доступа для неавторизованного пользователя
          к редактированию поста"""
-        response = self.guest_client.get(f'/posts/{StaticURLTests.post.id}/edit/')
+        response = self.guest_client.get(
+            f'/posts/{StaticURLTests.post.id}/edit/'
+        )
         self.assertEqual(response.status_code, 302)
 
     def test_edit_url_not_by_author(self):
