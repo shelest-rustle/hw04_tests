@@ -31,25 +31,28 @@ class PostsPagesTests(TestCase):
         cls.authorized_client.force_login(cls.user)
 
     def test_namespaces_urls_matching(self):
+
         templtates_pages_names = {
-            'posts/index.html': reverse('posts:index'),
-            'posts/group_list.html':
-                reverse('posts:group_list',
-                        kwargs={'slug': PostsPagesTests.group.slug}),
-            'posts/profile.html':
-                reverse('posts:profile',
-                        kwargs={'username': PostsPagesTests.user.username}),
-            'posts/post_detail.html':
-                reverse('posts:post_detail',
-                        kwargs={'post_id': PostsPagesTests.post.id}),
-            'posts/create_post.html':
-                reverse('posts:post_edit',
-                        kwargs={'post_id': PostsPagesTests.post.id}),
-            'posts/create_post.html': reverse('posts:post_create')
+            reverse('posts:index'): 'posts/index.html',
+            reverse(
+                'posts:group_list', kwargs={'slug': PostsPagesTests.group.slug}
+            ): 'posts/group_list.html',
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostsPagesTests.user.username}
+            ): 'posts/profile.html',
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': PostsPagesTests.post.id}
+            ): 'posts/post_detail.html',
+            reverse(
+                'posts:post_edit', kwargs={'post_id': PostsPagesTests.post.id}
+            ): 'posts/create_post.html',
+            reverse('posts:post_create'): 'posts/create_post.html'
         }
 
-        for template, reverse_name in templtates_pages_names.items():
-            with self.subTest(reverse_name=reverse_name):
+        for reverse_name, template in templtates_pages_names.items():
+            with self.subTest(template=template):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 

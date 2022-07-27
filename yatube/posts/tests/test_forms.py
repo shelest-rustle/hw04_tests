@@ -38,8 +38,10 @@ class PostCreateFormTests(TestCase):
         author_1 = User.objects.get(username='username')
         group_1 = Group.objects.get(title='Тестовая группа')
         self.assertEqual(Post.objects.count(), count_posts + 1)
-        self.assertRedirects(response, reverse('posts:profile',
-                                               kwargs={'username': 'username'}))
+        self.assertRedirects(
+            response,
+            reverse('posts:profile', kwargs={'username': 'username'})
+        )
         self.assertEqual(post_1.text, 'Тестовый текст')
         self.assertEqual(author_1.username, 'username')
         self.assertEqual(group_1.title, 'Тестовая группа')
