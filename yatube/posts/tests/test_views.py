@@ -106,21 +106,64 @@ class PostsPagesTests(TestCase):
         ))
         assert isinstance(response.context['form'], PostForm)
 
-    def test_paginator(self):
 
-        paginator_pages = [
-            reverse('posts:index'),
-            reverse(
-                'posts:group_list', kwargs={'slug': PostsPagesTests.group.slug}
-            ),
-            reverse(
-                'posts:profile',
-                kwargs={'username': PostsPagesTests.user.username}
+class PaginatorViewsTest(TestCase):
+    '''Тестирование работы паджинатора.'''
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.author = User.objects.create_user(username='name1')
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test-slug',
+            description='Тестовое описание')
+        cls.posts = []
+        for i in range(13):
+            cls.posts.append(Post(
+                text=f'Тестовый пост №{i}',
+                author=cls.author,
+                group=cls.group
             )
-        ]
+            )
+        Post.objects.bulk_create(cls.posts)
 
-        for page in paginator_pages:
+    def setUp(self):
+        self.guest_client = Client()
+        self.user = User.objects.create_user(username='username')
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
-            with self.subTest(page=page):
-                response = self.authorized_client.get(page)
-                self.assertIn('page_obj', response.context)
+    def test_first_page_contains_ten_posts(self):
+        urls = {
+            reverse('posts:index'): 'index',
+            reverse('posts:group_list',
+                    kwargs={'slug': PaginatorViewsTest.group.slug}): 'group',
+            reverse('posts:profile',
+                    kwargs={
+                        'username': PaginatorViewsTest.author.username
+                    }): 'profile',
+        }
+        for url in urls.keys():
+            response = self.client.get(url)
+            self.assertEqual(len(response.context.get('page_obj').object_list),
+                             10)
+
+    def test_second_page_contains_three_posts(self):
+        urls = {
+            reverse('posts:index') + '?page=2': 'index',
+            reverse('posts:group_list', kwargs={
+                'slug': PaginatorViewsTest.group.slug
+            }) + '?page=2':
+            'group',
+            reverse('posts:profile',
+                    kwargs={
+                        'username': PaginatorViewsTest.author.username
+                    }) + '?page=2':
+            'profile',
+        }
+        for url in urls.keys():
+            response = self.client.get(url)
+            self.assertEqual(
+                len(response.context.get('page_obj').object_list), 3
+            )
